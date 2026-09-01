@@ -56,12 +56,39 @@ task = Task(
 
 @api_bp.get("/tasks")
 def get_tasks():
-    tasks = Task.query.order_by(Task.created_at.desc()).all()
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    if page < 1:
+        page = 1
+
+    if per_page < 1:
+        per_page = 10
+
+    if per_page > 100:
+        per_page = 100
+
+    pagination = (
+        Task.query
+        .order_by(Task.created_at.desc())
+        .paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False,
+        )
+    )
 
     return jsonify(
         {
-            "tasks": [task.to_dict() for task in tasks],
-            "count": len(tasks),
+            "tasks": [task.to_dict() for task in pagination.items],
+            "pagination": {
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages,
+                "has_next": pagination.has_next,
+                "has_previous": pagination.has_prev,
+            },
         }
     ), 200
 @api_bp.get("/tasks/<int:task_id>")
