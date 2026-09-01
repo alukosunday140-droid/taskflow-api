@@ -10,6 +10,8 @@ def create_app(config_class=Config):
 
     db.init_app(app)
 
+    from app.models.task import Task  # noqa: F401
+
     from app.api import api_bp
 
     app.register_blueprint(api_bp)
@@ -17,5 +19,8 @@ def create_app(config_class=Config):
     from app.errors import register_error_handlers
 
     register_error_handlers(app)
+
+    with app.app_context():
+        db.create_all()
 
     return app
