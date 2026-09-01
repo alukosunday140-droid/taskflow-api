@@ -20,11 +20,33 @@ def create_task():
             }
         ), 400
 
-    task = Task(
-        title=title.strip(),
-        description=data.get("description"),
-        completed=bool(data.get("completed", False)),
-    )
+    description = data.get("description")
+
+if description is not None and not isinstance(description, str):
+    return jsonify(
+        {
+            "error": "Bad Request",
+            "message": "Description must be a string.",
+            "status": 400,
+        }
+    ), 400
+
+completed = data.get("completed", False)
+
+if not isinstance(completed, bool):
+    return jsonify(
+        {
+            "error": "Bad Request",
+            "message": "Completed must be a boolean.",
+            "status": 400,
+        }
+    ), 400
+
+task = Task(
+    title=title.strip(),
+    description=description.strip() if description else None,
+    completed=completed,
+)
 
     db.session.add(task)
     db.session.commit()
