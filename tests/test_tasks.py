@@ -200,3 +200,10 @@ def test_update_task_rejects_empty_title(client):
 
     assert data["error"] == "Bad Request"
     assert data["status"] == 400
+def test_create_task_rejects_non_object_json(client):
+    response = client.post(
+        "/api/v1/tasks",
+        json=["not", "an", "object"],
+    )
+
+    assert response.status_code == 400
