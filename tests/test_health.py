@@ -6,3 +6,12 @@ def test_health_check(client):
         "status": "ok",
         "service": "taskflow-api",
     }
+def test_unknown_route_returns_json_404(client):
+    response = client.get("/api/does-not-exist")
+
+    assert response.status_code == 404
+
+    data = response.get_json()
+
+    assert data["error"] == "Not Found"
+    assert data["status"] == 404
