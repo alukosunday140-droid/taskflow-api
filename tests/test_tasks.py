@@ -170,3 +170,14 @@ def test_task_list_pagination(client):
     assert len(data["tasks"]) == 5
     assert data["pagination"]["has_next"] is True
     assert data["pagination"]["has_previous"] is True
+def test_task_list_pagination_handles_invalid_values(client):
+    response = client.get(
+        "/api/v1/tasks?page=0&per_page=500"
+    )
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert data["pagination"]["page"] == 1
+    assert data["pagination"]["per_page"] == 100
