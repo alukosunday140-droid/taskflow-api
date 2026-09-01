@@ -37,10 +37,12 @@ def test_get_tasks(client):
 
     assert response.status_code == 200
 
-    data = response.get_json()
+data = response.get_json()
 
-    assert data["count"] == 1
-    assert data["tasks"][0]["title"] == "First task"
+assert data["pagination"]["total"] == 1
+assert data["pagination"]["page"] == 1
+assert data["pagination"]["per_page"] == 10
+assert data["tasks"][0]["title"] == "First task"
 
 
 def test_get_single_task(client):
@@ -143,3 +145,22 @@ def test_get_missing_task_returns_404(client):
 
     assert data["error"] == "Not Found"
     assert data["status"] == 404
+def test_task_list_pagination(client):
+    for number in range(12):
+        client.post(
+            "/api/tasks",
+            json={"title": f"Task {number}"},
+        )
+
+    response = client.get("/api/tasks?page=2&per_page=5")
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert data["pagination"]["page"] == 2
+    assert data["pagination"]["per_page"] == 5
+    assert data["pagination"]["total"] == 12
+    assert len(data["tasks"]) == 5
+    assert data["pagination"]["has_next"] is True
+    assert data["pagination"]["has_previous"] is True
