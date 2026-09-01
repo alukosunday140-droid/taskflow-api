@@ -181,3 +181,22 @@ def test_task_list_pagination_handles_invalid_values(client):
 
     assert data["pagination"]["page"] == 1
     assert data["pagination"]["per_page"] == 100
+def test_update_task_rejects_empty_title(client):
+    create_response = client.post(
+        "/api/v1/tasks",
+        json={"title": "Original title"},
+    )
+
+    task_id = create_response.get_json()["id"]
+
+    response = client.patch(
+        f"/api/v1/tasks/{task_id}",
+        json={"title": "   "},
+    )
+
+    assert response.status_code == 400
+
+    data = response.get_json()
+
+    assert data["error"] == "Bad Request"
+    assert data["status"] == 400
