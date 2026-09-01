@@ -96,3 +96,41 @@ def test_delete_task(client):
     get_response = client.get(f"/api/tasks/{task_id}")
 
     assert get_response.status_code == 404
+def test_create_task_rejects_invalid_completed_value(client):
+    response = client.post(
+        "/api/tasks",
+        json={
+            "title": "Invalid task",
+            "completed": "yes",
+        },
+    )
+
+    assert response.status_code == 400
+
+
+def test_create_task_rejects_invalid_description(client):
+    response = client.post(
+        "/api/tasks",
+        json={
+            "title": "Invalid task",
+            "description": 123,
+        },
+    )
+
+    assert response.status_code == 400
+
+
+def test_update_task_rejects_invalid_completed_value(client):
+    create_response = client.post(
+        "/api/tasks",
+        json={"title": "Test task"},
+    )
+
+    task_id = create_response.get_json()["id"]
+
+    response = client.patch(
+        f"/api/tasks/{task_id}",
+        json={"completed": "yes"},
+    )
+
+    assert response.status_code == 400
