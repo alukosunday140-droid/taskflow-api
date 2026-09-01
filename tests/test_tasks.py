@@ -134,3 +134,12 @@ def test_update_task_rejects_invalid_completed_value(client):
     )
 
     assert response.status_code == 400
+def test_get_missing_task_returns_404(client):
+    response = client.get("/api/tasks/9999")
+
+    assert response.status_code == 404
+
+    data = response.get_json()
+
+    assert data["error"] == "Not Found"
+    assert data["status"] == 404
