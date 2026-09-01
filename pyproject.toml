@@ -22,7 +22,7 @@ test = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-q"
+addopts = "-q --cov=app --cov-report=term-missing"
 [tool.ruff]
 line-length = 88
 target-version = "py311"
