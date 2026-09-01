@@ -91,7 +91,18 @@ def update_task(task_id):
         task.title = title.strip()
 
     if "description" in data:
-        task.description = data["description"]
+    description = data["description"]
+
+    if description is not None and not isinstance(description, str):
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Description must be a string.",
+                "status": 400,
+            }
+        ), 400
+
+    task.description = description.strip() if description else None
 
     if "completed" in data:
         if not isinstance(data["completed"], bool):
