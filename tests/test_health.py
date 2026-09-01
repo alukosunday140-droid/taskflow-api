@@ -24,3 +24,11 @@ def test_unknown_route_returns_json_404(client):
 
     assert data["error"] == "Not Found"
     assert data["status"] == 404
+def test_health_check_uses_database(client):
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+
+    data = response.get_json()
+
+    assert data["database"] == "ok"
