@@ -207,3 +207,36 @@ def test_create_task_rejects_non_object_json(client):
     )
 
     assert response.status_code == 400
+def test_create_task_rejects_non_object_request_body(client):
+    response = client.post(
+        "/api/v1/tasks",
+        json=["invalid", "payload"],
+    )
+
+    assert response.status_code == 400
+
+    data = response.get_json()
+
+    assert data["error"] == "Bad Request"
+    assert data["status"] == 400
+
+
+def test_update_task_rejects_non_object_request_body(client):
+    create_response = client.post(
+        "/api/v1/tasks",
+        json={"title": "Test task"},
+    )
+
+    task_id = create_response.get_json()["id"]
+
+    response = client.patch(
+        f"/api/v1/tasks/{task_id}",
+        json=["invalid", "payload"],
+    )
+
+    assert response.status_code == 400
+
+    data = response.get_json()
+
+    assert data["error"] == "Bad Request"
+    assert data["status"] == 400
