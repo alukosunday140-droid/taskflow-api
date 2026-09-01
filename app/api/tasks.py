@@ -7,7 +7,16 @@ from app.models.task import Task
 
 @api_bp.post("/tasks")
 def create_task():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Request body must be a JSON object.",
+                "status": 400,
+            }
+        ), 400
 
     title = data.get("title")
 
@@ -22,31 +31,31 @@ def create_task():
 
     description = data.get("description")
 
-if description is not None and not isinstance(description, str):
-    return jsonify(
-        {
-            "error": "Bad Request",
-            "message": "Description must be a string.",
-            "status": 400,
-        }
-    ), 400
+    if description is not None and not isinstance(description, str):
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Description must be a string.",
+                "status": 400,
+            }
+        ), 400
 
-completed = data.get("completed", False)
+    completed = data.get("completed", False)
 
-if not isinstance(completed, bool):
-    return jsonify(
-        {
-            "error": "Bad Request",
-            "message": "Completed must be a boolean.",
-            "status": 400,
-        }
-    ), 400
+    if not isinstance(completed, bool):
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Completed must be a boolean.",
+                "status": 400,
+            }
+        ), 400
 
-task = Task(
-    title=title.strip(),
-    description=description.strip() if description else None,
-    completed=completed,
-)
+    task = Task(
+        title=title.strip(),
+        description=description.strip() if description else None,
+        completed=completed,
+    )
 
     db.session.add(task)
     db.session.commit()
@@ -91,6 +100,8 @@ def get_tasks():
             },
         }
     ), 200
+
+
 @api_bp.get("/tasks/<int:task_id>")
 def get_task(task_id):
     task = db.get_or_404(Task, task_id)
@@ -101,7 +112,17 @@ def get_task(task_id):
 @api_bp.patch("/tasks/<int:task_id>")
 def update_task(task_id):
     task = db.get_or_404(Task, task_id)
-    data = request.get_json(silent=True) or {}
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify(
+            {
+                "error": "Bad Request",
+                "message": "Request body must be a JSON object.",
+                "status": 400,
+            }
+        ), 400
 
     if "title" in data:
         title = data["title"]
@@ -118,18 +139,18 @@ def update_task(task_id):
         task.title = title.strip()
 
     if "description" in data:
-    description = data["description"]
+        description = data["description"]
 
-    if description is not None and not isinstance(description, str):
-        return jsonify(
-            {
-                "error": "Bad Request",
-                "message": "Description must be a string.",
-                "status": 400,
-            }
-        ), 400
+        if description is not None and not isinstance(description, str):
+            return jsonify(
+                {
+                    "error": "Bad Request",
+                    "message": "Description must be a string.",
+                    "status": 400,
+                }
+            ), 400
 
-    task.description = description.strip() if description else None
+        task.description = description.strip() if description else None
 
     if "completed" in data:
         if not isinstance(data["completed"], bool):
